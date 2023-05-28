@@ -1,21 +1,26 @@
-const express = require('express');
+const express = require("express");
+const bodyParser = require("body-parser");
+const fs = require("fs");
+const path = require("path");
+
 const app = express();
+app.use(bodyParser.json());
 
 const PORT = process.env.PORT || 4000;
 
-app.use(express.json());
-
-const dataTrains = require('./data/trains.json');
-
-app.get('/', (req, res) => {
-    res.send('Hello from Nerdbord!');
+app.get("/", (req, res) => {
+  res.send("Hello from Nerdbord!");
 });
 
-
-app.get('/trains', (req, res) => {
-    res.status(200).send(JSON.stringify(dataTrains));
-})
+app.post("/trains", (req, res) => {
+  const createTrainPayload = req.body;
+  const trainsFilePath = path.join(__dirname, "data", "trains.json");
+  const trains = JSON.parse(fs.readFileSync(trainsFilePath));
+  trains.push(createTrainPayload);
+  fs.writeFileSync(trainsFilePath, JSON.stringify(trains));
+  res.send("Train added successfully");
+});
 
 app.listen(PORT, () => {
-    console.log(`Server listening on port ${PORT}`);
+  console.log(`Server listening on port ${PORT}`);
 });
